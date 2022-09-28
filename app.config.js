@@ -1,5 +1,5 @@
 export default {
   extra: {
-    apiUrl: 'http://192.168.33.11:3000',
+    apiUrl: 'http://LOCAL_IPADDR:3000',
   },
 };
