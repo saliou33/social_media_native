@@ -1,5 +1,6 @@
 import React, { createContext, useReducer } from 'react';
 import Constants from 'expo-constants';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const { apiUrl } = Constants.manifest.extra;
 
@@ -47,16 +48,14 @@ export const UserContextProvider = ({ children }) => {
 
   async function loginUser(username, password) {
     try {
-      const data = await fetch(
-        `${apiUrl}/api/login?username=${username}&password=${password}`,
-        {
-          method: 'POST',
-        },
-      );
+      const data = await fetch(`${apiUrl}/api/login?username=${username}&password=${password}`, {
+        method: 'POST',
+      });
       const result = await data.json();
 
       if (result) {
         dispatch({ type: 'SET_USER_TOKEN', payload: result.token });
+        AsyncStorage.setItem('token', result.token);
       }
     } catch (e) {
       dispatch({ type: 'SET_USER_ERROR', payload: e.message });
@@ -64,11 +63,24 @@ export const UserContextProvider = ({ children }) => {
   }
 
   async function logoutUser() {
-    dispatch({ type: 'REMOVE_USER_TOKEN' });
+    try {
+      await AsyncStorage.removeItem('token');
+      dispatch({ type: 'REMOVE_USER_TOKEN' });
+    } catch (e) {}
+  }
+
+  async function getToken() {
+    try {
+      const token = await AsyncStorage.getItem('token');
+
+      if (token) {
+        dispatch({ type: 'SET_USER_TOKEN', payload: token });
+      }
+    } catch (e) {}
   }
 
   return (
-    <UserContext.Provider value={{ ...state, loginUser, logoutUser }}>
+    <UserContext.Provider value={{ ...state, loginUser, logoutUser, getToken }}>
       {children}
     </UserContext.Provider>
   );

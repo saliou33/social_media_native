@@ -1,13 +1,21 @@
-import React, { useContext, useState } from 'react';
+import { useNavigation } from '@react-navigation/native';
+import React, { useContext, useEffect, useState } from 'react';
 import { StyleSheet, TouchableOpacity, Text, View } from 'react-native';
 import FormInput from '../components/FormInput';
 import UserContext from '../context/UserContext';
 
-export default function Login() {
+const Login = () => {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
 
-  const { error, loginUser } = useContext(UserContext);
+  const { user, error, loginUser } = useContext(UserContext);
+  const navigation = useNavigation();
+
+  useEffect(() => {
+    if (user.token) {
+      navigation.navigate('Home');
+    }
+  }, [user.token]);
 
   return (
     <View style={styles.container}>
@@ -15,14 +23,14 @@ export default function Login() {
       <FormInput
         onChangeText={setUsername}
         value={username}
-        placeholder='Your username'
-        textContentType='username'
+        placeholder="Your username"
+        textContentType="username"
       />
       <FormInput
         onChangeText={setPassword}
         value={password}
-        placeholder='Your password'
-        textContentType='password'
+        placeholder="Your password"
+        textContentType="password"
         secureTextEntry
       />
       <TouchableOpacity onPress={() => loginUser(username, password)}>
@@ -32,7 +40,9 @@ export default function Login() {
       </TouchableOpacity>
     </View>
   );
-}
+};
+
+export default Login;
 
 const styles = StyleSheet.create({
   container: {
